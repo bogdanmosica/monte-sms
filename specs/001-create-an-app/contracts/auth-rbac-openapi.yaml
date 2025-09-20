@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Montessori School Auth & RBAC API
+  version: 1.0.0
+paths:
+  /api/auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+  /api/auth/logout:
+    post:
+      summary: Logout user
+      responses:
+        '200':
+          description: Successful logout
+        '401':
+          description: Unauthorized
+  /api/user/me:
+    get:
+      summary: Get current user info
+      responses:
+        '200':
+          description: User info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+  /api/children:
+    get:
+      summary: Get children for parent/teacher
+      responses:
+        '200':
+          description: List of children
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Child'
+        '401':
+          description: Unauthorized
+  /api/admin/billing:
+    get:
+      summary: Get billing info (admin only)
+      responses:
+        '200':
+          description: Billing info
+        '403':
+          description: Forbidden
+        '401':
+          description: Unauthorized
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        school_id:
+          type: string
+    Child:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        birthdate:
+          type: string
+        school_id:
+          type: string
+        parent_id:
+          type: string

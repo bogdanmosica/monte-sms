@@ -7,27 +7,26 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
-
-// Import Montessori-specific models
-import { schools, schoolsRelations } from './school';
 import { children, childrenRelations } from './child';
+import {
+  learningPathComments,
+  learningPathCommentsRelations,
+  learningPathStages,
+  learningPathStagesRelations,
+  learningPaths,
+  learningPathsRelations,
+} from './learning-path';
 import { observations, observationsRelations } from './observation';
 import {
-  portfolioEntries,
-  portfolioCollections,
   portfolioCollectionEntries,
-  portfolioEntriesRelations,
+  portfolioCollectionEntriesRelations,
+  portfolioCollections,
   portfolioCollectionsRelations,
-  portfolioCollectionEntriesRelations
+  portfolioEntries,
+  portfolioEntriesRelations,
 } from './portfolio';
-import {
-  learningPaths,
-  learningPathStages,
-  learningPathComments,
-  learningPathsRelations,
-  learningPathStagesRelations,
-  learningPathCommentsRelations
-} from './learning-path';
+// Import Montessori-specific models
+import { schools, schoolsRelations } from './school';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -171,6 +170,27 @@ export enum UserRole {
   MEMBER = 'member',
 }
 
+// Access log entity for tracking user access events
+export const accessLogs = pgTable('access_logs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  routeId: varchar('route_id', { length: 255 }).notNull(),
+  eventType: varchar('event_type', { length: 50 }).notNull(), // login, access_granted, access_denied, logout
+  timestamp: timestamp('timestamp').notNull().defaultNow(),
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
+  metadata: text('metadata'), // JSON string for additional context
+});
+
+export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [accessLogs.userId],
+    references: [users.id],
+  }),
+}));
+
 // Re-export all Montessori models and relations
 export {
   schools,
@@ -190,5 +210,5 @@ export {
   portfolioCollectionEntriesRelations,
   learningPathsRelations,
   learningPathStagesRelations,
-  learningPathCommentsRelations
+  learningPathCommentsRelations,
 };

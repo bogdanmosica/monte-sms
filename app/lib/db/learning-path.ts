@@ -95,8 +95,12 @@ export const learningPathStages = pgTable('learning_path_stages', {
   evidenceUrls: jsonb('evidence_urls'), // Photos, videos of child work
 
   // Connection to other records
-  linkedObservationId: integer('linked_observation_id').references(() => observations.id),
-  linkedPortfolioEntryId: integer('linked_portfolio_entry_id').references(() => portfolioEntries.id),
+  linkedObservationId: integer('linked_observation_id').references(
+    () => observations.id
+  ),
+  linkedPortfolioEntryId: integer('linked_portfolio_entry_id').references(
+    () => portfolioEntries.id
+  ),
 
   // Timestamps
   createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -129,49 +133,58 @@ export const learningPathComments = pgTable('learning_path_comments', {
 });
 
 // Relations
-export const learningPathsRelations = relations(learningPaths, ({ one, many }) => ({
-  child: one(children, {
-    fields: [learningPaths.childId],
-    references: [children.id],
-  }),
-  createdBy: one(users, {
-    fields: [learningPaths.createdById],
-    references: [users.id],
-  }),
-  stages: many(learningPathStages),
-  comments: many(learningPathComments),
-}));
+export const learningPathsRelations = relations(
+  learningPaths,
+  ({ one, many }) => ({
+    child: one(children, {
+      fields: [learningPaths.childId],
+      references: [children.id],
+    }),
+    createdBy: one(users, {
+      fields: [learningPaths.createdById],
+      references: [users.id],
+    }),
+    stages: many(learningPathStages),
+    comments: many(learningPathComments),
+  })
+);
 
-export const learningPathStagesRelations = relations(learningPathStages, ({ one, many }) => ({
-  path: one(learningPaths, {
-    fields: [learningPathStages.pathId],
-    references: [learningPaths.id],
-  }),
-  linkedObservation: one(observations, {
-    fields: [learningPathStages.linkedObservationId],
-    references: [observations.id],
-  }),
-  linkedPortfolioEntry: one(portfolioEntries, {
-    fields: [learningPathStages.linkedPortfolioEntryId],
-    references: [portfolioEntries.id],
-  }),
-  comments: many(learningPathComments),
-}));
+export const learningPathStagesRelations = relations(
+  learningPathStages,
+  ({ one, many }) => ({
+    path: one(learningPaths, {
+      fields: [learningPathStages.pathId],
+      references: [learningPaths.id],
+    }),
+    linkedObservation: one(observations, {
+      fields: [learningPathStages.linkedObservationId],
+      references: [observations.id],
+    }),
+    linkedPortfolioEntry: one(portfolioEntries, {
+      fields: [learningPathStages.linkedPortfolioEntryId],
+      references: [portfolioEntries.id],
+    }),
+    comments: many(learningPathComments),
+  })
+);
 
-export const learningPathCommentsRelations = relations(learningPathComments, ({ one }) => ({
-  path: one(learningPaths, {
-    fields: [learningPathComments.pathId],
-    references: [learningPaths.id],
-  }),
-  stage: one(learningPathStages, {
-    fields: [learningPathComments.stageId],
-    references: [learningPathStages.id],
-  }),
-  author: one(users, {
-    fields: [learningPathComments.authorId],
-    references: [users.id],
-  }),
-}));
+export const learningPathCommentsRelations = relations(
+  learningPathComments,
+  ({ one }) => ({
+    path: one(learningPaths, {
+      fields: [learningPathComments.pathId],
+      references: [learningPaths.id],
+    }),
+    stage: one(learningPathStages, {
+      fields: [learningPathComments.stageId],
+      references: [learningPathStages.id],
+    }),
+    author: one(users, {
+      fields: [learningPathComments.authorId],
+      references: [users.id],
+    }),
+  })
+);
 
 // Type exports
 export type LearningPath = typeof learningPaths.$inferSelect;

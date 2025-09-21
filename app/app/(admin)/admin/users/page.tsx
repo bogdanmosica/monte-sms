@@ -1,11 +1,17 @@
 'use client';
 
 import useSWR from 'swr';
-import { UserRole } from '@/lib/db/schema';
-import { getUser } from '@/lib/db/queries';
 import { UserManagement } from '@/components/admin/user-management';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { getUser } from '@/lib/db/queries';
+import { UserRole } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -21,7 +27,9 @@ export default function AdminUsersPage() {
               <CardTitle>Access Error</CardTitle>
             </CardHeader>
             <CardContent>
-              <p>Unable to verify your permissions. Please try logging in again.</p>
+              <p>
+                Unable to verify your permissions. Please try logging in again.
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -44,7 +52,8 @@ export default function AdminUsersPage() {
   }
 
   // Check if user has permission to access this page
-  const canAccessUserManagement = user.role === UserRole.OWNER || user.role === UserRole.ADMIN;
+  const canAccessUserManagement =
+    user.role === UserRole.OWNER || user.role === UserRole.ADMIN;
 
   if (!canAccessUserManagement) {
     return (
@@ -69,7 +78,9 @@ export default function AdminUsersPage() {
         <div className="container mx-auto p-6 space-y-6">
           <div className="flex items-center justify-between space-y-2">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">User Role Management</h2>
+              <h2 className="text-3xl font-bold tracking-tight">
+                User Role Management
+              </h2>
               <p className="text-muted-foreground">
                 Manage user roles and permissions across the platform
               </p>

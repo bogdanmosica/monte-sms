@@ -24,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { mockChildren, mockObservations } from '@/lib/mock-data';
 
-
 const getCategoryColor = (category: string) => {
   switch (category) {
     case 'academic':

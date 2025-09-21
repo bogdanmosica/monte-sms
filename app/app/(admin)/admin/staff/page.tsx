@@ -25,7 +25,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
-
 // Mock staff data with additional details
 const mockStaffMembers = [
   {

@@ -81,7 +81,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/auth/validate', {
         headers: {
-          'Authorization': 'Bearer valid-token',
+          Authorization: 'Bearer valid-token',
         },
       });
 
@@ -114,7 +114,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/children', {
         headers: {
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
       });
 
@@ -145,7 +145,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/observations?limit=20', {
         headers: {
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
       });
 
@@ -175,7 +175,7 @@ describe('Performance Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
         body: JSON.stringify({
           childId: 1,
@@ -213,20 +213,21 @@ describe('Performance Tests', () => {
                   { id: 1, title: 'Observation 1' },
                   { id: 2, title: 'Observation 2' },
                 ],
-                portfolioEntries: [
-                  { id: 1, title: 'Portfolio 1' },
-                ],
+                portfolioEntries: [{ id: 1, title: 'Portfolio 1' }],
               },
             ],
           },
         }),
       });
 
-      const response = await fetch('/api/children?include=observations,portfolio', {
-        headers: {
-          'Authorization': 'Bearer teacher-token',
-        },
-      });
+      const response = await fetch(
+        '/api/children?include=observations,portfolio',
+        {
+          headers: {
+            Authorization: 'Bearer teacher-token',
+          },
+        }
+      );
 
       const endTime = performance.now();
       const duration = endTime - startTime;
@@ -252,7 +253,7 @@ describe('Performance Tests', () => {
         .fill(null)
         .map(() =>
           fetch('/api/observations', {
-            headers: { 'Authorization': 'Bearer teacher-token' },
+            headers: { Authorization: 'Bearer teacher-token' },
           })
         );
 
@@ -300,7 +301,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/observations?limit=100', {
         headers: {
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
       });
 
@@ -331,7 +332,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/observations?limit=20&offset=0', {
         headers: {
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
       });
 
@@ -362,7 +363,7 @@ describe('Performance Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer teacher-token',
+          Authorization: 'Bearer teacher-token',
         },
         body: JSON.stringify({
           resource: 'observations',
@@ -400,7 +401,7 @@ describe('Performance Tests', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer teacher-token',
+            Authorization: 'Bearer teacher-token',
           },
           body: JSON.stringify({
             resource: permission.split(':')[1],
@@ -465,7 +466,7 @@ describe('Performance Tests', () => {
 
       const response = await fetch('/api/admin/users', {
         headers: {
-          'Authorization': 'Bearer parent-token',
+          Authorization: 'Bearer parent-token',
         },
       });
 

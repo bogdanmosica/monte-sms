@@ -124,7 +124,8 @@ export function useCreateChild() {
       const data = await response.json();
       return data.child;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {
@@ -165,7 +166,8 @@ export function useUpdateChild(id: number) {
       const data = await response.json();
       return data.child;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {
@@ -201,7 +203,8 @@ export function useDeleteChild() {
 
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {

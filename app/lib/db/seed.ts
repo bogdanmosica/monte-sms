@@ -2,15 +2,15 @@ import { hashPassword } from '@/lib/auth/session';
 import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
 import {
-  teamMembers,
-  teams,
-  users,
-  schools,
   children,
+  learningPaths,
   observations,
   portfolioEntries,
-  learningPaths,
-  UserRole
+  schools,
+  teamMembers,
+  teams,
+  UserRole,
+  users,
 } from './schema';
 
 async function createStripeProducts() {
@@ -65,7 +65,7 @@ async function seed() {
       email: 'admin@montessori-academy.edu',
       ageRangeMin: 3,
       ageRangeMax: 6,
-      capacity: 60
+      capacity: 60,
     })
     .returning();
 
@@ -143,8 +143,8 @@ async function seed() {
         relationship: 'Mother',
         phone: '(555) 987-6543',
         email: 'jane.smith@example.com',
-        canPickup: true
-      }
+        canPickup: true,
+      },
     })
     .returning();
 
@@ -167,8 +167,8 @@ async function seed() {
         relationship: 'Father',
         phone: '(555) 456-7890',
         email: 'mike.wilson@example.com',
-        canPickup: true
-      }
+        canPickup: true,
+      },
     })
     .returning();
 
@@ -180,11 +180,16 @@ async function seed() {
       childId: child1.id,
       teacherId: teacherUser.id,
       title: 'Practical Life - Pouring Water',
-      description: 'Emma demonstrated excellent concentration while pouring water from pitcher to pitcher. She completed 5 repetitions independently.',
+      description:
+        'Emma demonstrated excellent concentration while pouring water from pitcher to pitcher. She completed 5 repetitions independently.',
       montessoriArea: 'Practical Life',
       activityType: 'Pouring',
       workCycle: 'Morning',
-      skillsDemonstrated: ['Fine motor skills', 'Concentration', 'Independence'],
+      skillsDemonstrated: [
+        'Fine motor skills',
+        'Concentration',
+        'Independence',
+      ],
       socialInteraction: 'Independent',
       childInterest: 'High',
       concentrationLevel: 'Excellent',
@@ -192,13 +197,14 @@ async function seed() {
       nextSteps: 'Introduce pouring with smaller pitcher',
       materialsUsed: ['Glass pitcher', 'Small cups', 'Sponge'],
       observationDate: new Date('2024-09-15'),
-      tags: ['practical-life', 'motor-skills', 'concentration']
+      tags: ['practical-life', 'motor-skills', 'concentration'],
     },
     {
       childId: child2.id,
       teacherId: teacherUser.id,
       title: 'Mathematics - Number Rods',
-      description: 'Oliver worked with number rods for 25 minutes, accurately ordering from 1-10 and counting each rod.',
+      description:
+        'Oliver worked with number rods for 25 minutes, accurately ordering from 1-10 and counting each rod.',
       montessoriArea: 'Mathematics',
       activityType: 'Number Rods',
       workCycle: 'Morning',
@@ -210,8 +216,8 @@ async function seed() {
       nextSteps: 'Introduce sandpaper numbers',
       materialsUsed: ['Number rods 1-10'],
       observationDate: new Date('2024-09-16'),
-      tags: ['mathematics', 'counting', 'sequencing']
-    }
+      tags: ['mathematics', 'counting', 'sequencing'],
+    },
   ]);
 
   console.log('📝 Sample observations created');
@@ -226,22 +232,24 @@ async function seed() {
       type: 'Weekly Summary',
       montessoriArea: 'General',
       skillsDemonstrated: ['Social adaptation', 'Following routines'],
-      teacherObservation: 'Shows natural leadership qualities and helps younger children.',
+      teacherObservation:
+        'Shows natural leadership qualities and helps younger children.',
       workDate: new Date('2024-09-06'),
-      tags: ['adaptation', 'leadership', 'social-skills']
+      tags: ['adaptation', 'leadership', 'social-skills'],
     },
     {
       childId: child2.id,
       createdById: teacherUser.id,
       title: 'Mathematics Discovery',
-      description: 'Oliver\'s journey with mathematical concepts this month.',
+      description: "Oliver's journey with mathematical concepts this month.",
       type: 'Monthly Summary',
       montessoriArea: 'Mathematics',
       skillsDemonstrated: ['Number concepts', 'Problem solving'],
-      teacherObservation: 'Shows strong logical thinking and perseverance with challenging materials.',
+      teacherObservation:
+        'Shows strong logical thinking and perseverance with challenging materials.',
       workDate: new Date('2024-09-20'),
-      tags: ['mathematics', 'logical-thinking', 'perseverance']
-    }
+      tags: ['mathematics', 'logical-thinking', 'perseverance'],
+    },
   ]);
 
   console.log('📚 Sample portfolio entries created');
@@ -260,7 +268,7 @@ async function seed() {
       targetCompletionDate: new Date('2024-12-01'),
       totalStages: 5,
       completedStages: 1,
-      progressPercentage: 20
+      progressPercentage: 20,
     },
     {
       childId: child2.id,
@@ -274,8 +282,8 @@ async function seed() {
       targetCompletionDate: new Date('2024-12-15'),
       totalStages: 8,
       completedStages: 2,
-      progressPercentage: 25
-    }
+      progressPercentage: 25,
+    },
   ]);
 
   console.log('🛤️ Sample learning paths created');

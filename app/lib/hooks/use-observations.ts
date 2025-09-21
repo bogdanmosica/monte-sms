@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 // Types from our API
@@ -39,7 +39,11 @@ export interface CreateObservationData {
   activityType?: string;
   workCycle?: 'Morning' | 'Afternoon';
   skillsDemonstrated?: any[];
-  socialInteraction?: 'Individual' | 'Small Group' | 'Large Group' | 'Peer to Peer';
+  socialInteraction?:
+    | 'Individual'
+    | 'Small Group'
+    | 'Large Group'
+    | 'Peer to Peer';
   childInterest?: 'High' | 'Medium' | 'Low';
   concentrationLevel?: 'Deep' | 'Moderate' | 'Brief';
   independenceLevel?: 'Independent' | 'Guided' | 'Assisted';
@@ -129,7 +133,8 @@ export function useCreateObservation() {
       const data = await response.json();
       return data.observation;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {
@@ -149,7 +154,9 @@ export function useUpdateObservation(id: number) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const updateObservation = async (observationData: Partial<CreateObservationData>) => {
+  const updateObservation = async (
+    observationData: Partial<CreateObservationData>
+  ) => {
     setIsLoading(true);
     setError(null);
 
@@ -170,7 +177,8 @@ export function useUpdateObservation(id: number) {
       const data = await response.json();
       return data.observation;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {
@@ -206,7 +214,8 @@ export function useDeleteObservation() {
 
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       throw err;
     } finally {
@@ -238,12 +247,14 @@ export function useObservationStats() {
   observations.forEach((obs: ObservationData) => {
     // Count by Montessori area
     if (obs.montessoriArea) {
-      stats.byArea[obs.montessoriArea] = (stats.byArea[obs.montessoriArea] || 0) + 1;
+      stats.byArea[obs.montessoriArea] =
+        (stats.byArea[obs.montessoriArea] || 0) + 1;
     }
 
     // Count by child interest
     if (obs.childInterest) {
-      stats.byInterest[obs.childInterest] = (stats.byInterest[obs.childInterest] || 0) + 1;
+      stats.byInterest[obs.childInterest] =
+        (stats.byInterest[obs.childInterest] || 0) + 1;
     }
 
     // Count this week

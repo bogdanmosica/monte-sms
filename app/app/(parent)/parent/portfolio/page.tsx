@@ -21,13 +21,12 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserRole } from '@/lib/db/schema';
 import {
   getActivitiesByChild,
   getChildrenByParent,
   mockUsers,
 } from '@/lib/mock-data';
-import { UserRole } from '@/lib/db/schema';
-
 
 export default function ParentPortfolio() {
   const currentParent = mockUsers.find((user) => user.role === UserRole.PARENT);

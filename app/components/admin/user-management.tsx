@@ -1,8 +1,10 @@
 'use client';
 
+import { AlertTriangle, Loader2, UserCheck, Users } from 'lucide-react';
 import { useState } from 'react';
 import useSWR from 'swr';
-import { UserRole } from '@/lib/db/schema';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,6 +13,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -18,17 +27,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Users, UserCheck, AlertTriangle } from 'lucide-react';
+import { UserRole } from '@/lib/db/schema';
 
 interface User {
   id: number;
@@ -54,7 +54,8 @@ export function UserManagement({ currentUserRole }: UserManagementProps) {
     fetcher
   );
 
-  const canManageRoles = currentUserRole === UserRole.OWNER || currentUserRole === UserRole.ADMIN;
+  const canManageRoles =
+    currentUserRole === UserRole.OWNER || currentUserRole === UserRole.ADMIN;
 
   const updateUserRole = async (userId: number, newRole: UserRole) => {
     if (!canManageRoles) {
@@ -158,7 +159,8 @@ export function UserManagement({ currentUserRole }: UserManagementProps) {
           User Management
         </CardTitle>
         <CardDescription>
-          Manage user roles and permissions. Only owners and admins can promote parents to teachers.
+          Manage user roles and permissions. Only owners and admins can promote
+          parents to teachers.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -190,8 +192,12 @@ export function UserManagement({ currentUserRole }: UserManagementProps) {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{user.name || 'Unnamed User'}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="font-medium">
+                          {user.name || 'Unnamed User'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -202,20 +208,28 @@ export function UserManagement({ currentUserRole }: UserManagementProps) {
                     {canManageRoles && (
                       <TableCell>
                         {user.role === UserRole.OWNER ? (
-                          <span className="text-sm text-muted-foreground">Cannot modify</span>
+                          <span className="text-sm text-muted-foreground">
+                            Cannot modify
+                          </span>
                         ) : (
                           <div className="flex items-center gap-2">
                             <Select
                               value={user.role}
-                              onValueChange={(newRole: UserRole) => updateUserRole(user.id, newRole)}
+                              onValueChange={(newRole: UserRole) =>
+                                updateUserRole(user.id, newRole)
+                              }
                               disabled={updating === user.id}
                             >
                               <SelectTrigger className="w-32">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value={UserRole.PARENT}>Parent</SelectItem>
-                                <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+                                <SelectItem value={UserRole.PARENT}>
+                                  Parent
+                                </SelectItem>
+                                <SelectItem value={UserRole.TEACHER}>
+                                  Teacher
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             {updating === user.id && (

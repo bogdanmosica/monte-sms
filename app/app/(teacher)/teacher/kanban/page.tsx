@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockChildren } from '@/lib/mock-data';
 
-
 // Mock kanban tasks
 const mockTasks = [
   {

@@ -1,6 +1,13 @@
 'use client';
 
-import { BookOpen, Calendar, ClipboardList, MessageCircle, TrendingUp, Users } from 'lucide-react';
+import {
+  BookOpen,
+  Calendar,
+  ClipboardList,
+  MessageCircle,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -53,9 +60,7 @@ export function TeacherTopBarLinks() {
             href={item.href}
             className={cn(
               'flex items-center space-x-2 text-sm font-medium transition-colors hover:text-emerald-600',
-              isActive
-                ? 'text-emerald-600'
-                : 'text-gray-600'
+              isActive ? 'text-emerald-600' : 'text-gray-600'
             )}
           >
             <Icon className="h-4 w-4" />

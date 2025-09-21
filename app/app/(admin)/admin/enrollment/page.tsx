@@ -22,7 +22,6 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockChildren } from '@/lib/mock-data';
 
-
 // Mock enrollment applications
 const mockApplications = [
   {

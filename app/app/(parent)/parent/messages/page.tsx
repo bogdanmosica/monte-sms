@@ -12,9 +12,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { mockUsers } from '@/lib/mock-data';
 import { UserRole } from '@/lib/db/schema';
-
+import { mockUsers } from '@/lib/mock-data';
 
 // Mock messages data
 const mockMessages = [

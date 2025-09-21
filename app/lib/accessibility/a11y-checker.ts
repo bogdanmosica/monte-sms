@@ -1,7 +1,7 @@
 // Accessibility utilities for shadcn/ui components
 // This module provides accessibility checking and enhancement utilities
 
-import { useEffect, useState, RefObject } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 
 export interface AccessibilityIssue {
   severity: 'error' | 'warning' | 'info';
@@ -19,22 +19,27 @@ export interface AccessibilityReport {
 }
 
 // Color contrast utilities
-export function getContrastRatio(foreground: string, background: string): number {
+export function getContrastRatio(
+  foreground: string,
+  background: string
+): number {
   // Convert hex to RGB
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   };
 
   // Get relative luminance
   const getLuminance = (r: number, g: number, b: number) => {
-    const [rs, gs, bs] = [r, g, b].map(c => {
+    const [rs, gs, bs] = [r, g, b].map((c) => {
       c = c / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
     });
     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
   };
@@ -77,12 +82,14 @@ export function checkColorContrast(
   return {
     passes: ratio >= required,
     ratio,
-    required
+    required,
   };
 }
 
 // Keyboard navigation checker
-export function checkKeyboardNavigation(element: HTMLElement): AccessibilityIssue[] {
+export function checkKeyboardNavigation(
+  element: HTMLElement
+): AccessibilityIssue[] {
   const issues: AccessibilityIssue[] = [];
 
   // Check if interactive elements are focusable
@@ -101,7 +108,8 @@ export function checkKeyboardNavigation(element: HTMLElement): AccessibilityIssu
         rule: 'keyboard-navigation',
         message: 'Interactive element has negative tabindex',
         element: htmlEl.tagName.toLowerCase(),
-        suggestion: 'Remove negative tabindex or ensure element is not interactive'
+        suggestion:
+          'Remove negative tabindex or ensure element is not interactive',
       });
     }
 
@@ -112,7 +120,7 @@ export function checkKeyboardNavigation(element: HTMLElement): AccessibilityIssu
         rule: 'keyboard-events',
         message: 'Element has click handler but no keyboard event handler',
         element: htmlEl.tagName.toLowerCase(),
-        suggestion: 'Add onKeyDown handler to support keyboard interaction'
+        suggestion: 'Add onKeyDown handler to support keyboard interaction',
       });
     }
   });
@@ -126,7 +134,7 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
 
   // Check for missing labels
   const inputs = element.querySelectorAll('input, select, textarea');
-  inputs.forEach(input => {
+  inputs.forEach((input) => {
     const htmlInput = input as HTMLInputElement;
     const hasLabel =
       htmlInput.getAttribute('aria-label') ||
@@ -140,14 +148,15 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
         rule: 'missing-label',
         message: 'Form input missing accessible label',
         element: htmlInput.tagName.toLowerCase(),
-        suggestion: 'Add aria-label, aria-labelledby, or associate with a label element'
+        suggestion:
+          'Add aria-label, aria-labelledby, or associate with a label element',
       });
     }
   });
 
   // Check button accessibility
   const buttons = element.querySelectorAll('button, [role="button"]');
-  buttons.forEach(button => {
+  buttons.forEach((button) => {
     const htmlButton = button as HTMLButtonElement;
     const hasAccessibleName =
       htmlButton.textContent?.trim() ||
@@ -160,7 +169,7 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
         rule: 'button-name',
         message: 'Button missing accessible name',
         element: htmlButton.tagName.toLowerCase(),
-        suggestion: 'Add visible text content or aria-label'
+        suggestion: 'Add visible text content or aria-label',
       });
     }
   });
@@ -168,7 +177,7 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
   // Check for proper heading hierarchy
   const headings = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
   let lastLevel = 0;
-  headings.forEach(heading => {
+  headings.forEach((heading) => {
     const level = parseInt(heading.tagName.charAt(1));
     if (level > lastLevel + 1) {
       issues.push({
@@ -176,7 +185,8 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
         rule: 'heading-hierarchy',
         message: `Heading level skips from h${lastLevel} to h${level}`,
         element: heading.tagName.toLowerCase(),
-        suggestion: 'Use sequential heading levels for proper document structure'
+        suggestion:
+          'Use sequential heading levels for proper document structure',
       });
     }
     lastLevel = level;
@@ -186,12 +196,16 @@ export function checkARIA(element: HTMLElement): AccessibilityIssue[] {
 }
 
 // Focus management checker
-export function checkFocusManagement(element: HTMLElement): AccessibilityIssue[] {
+export function checkFocusManagement(
+  element: HTMLElement
+): AccessibilityIssue[] {
   const issues: AccessibilityIssue[] = [];
 
   // Check for focus traps in modals/dialogs
-  const modals = element.querySelectorAll('[role="dialog"], [role="alertdialog"], .modal');
-  modals.forEach(modal => {
+  const modals = element.querySelectorAll(
+    '[role="dialog"], [role="alertdialog"], .modal'
+  );
+  modals.forEach((modal) => {
     const focusableElements = modal.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
@@ -202,19 +216,24 @@ export function checkFocusManagement(element: HTMLElement): AccessibilityIssue[]
         rule: 'focus-trap',
         message: 'Modal/dialog contains no focusable elements',
         element: 'dialog',
-        suggestion: 'Ensure modals have at least one focusable element'
+        suggestion: 'Ensure modals have at least one focusable element',
       });
     }
   });
 
   // Check for skip links
-  const firstFocusable = element.querySelector('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-  if (firstFocusable && !element.querySelector('.skip-link, [href="#main-content"]')) {
+  const firstFocusable = element.querySelector(
+    'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (
+    firstFocusable &&
+    !element.querySelector('.skip-link, [href="#main-content"]')
+  ) {
     issues.push({
       severity: 'warning',
       rule: 'skip-navigation',
       message: 'Missing skip navigation link',
-      suggestion: 'Add skip link to main content for keyboard users'
+      suggestion: 'Add skip link to main content for keyboard users',
     });
   }
 
@@ -234,14 +253,22 @@ export function auditAccessibility(element: HTMLElement): AccessibilityReport {
   issues.push(...keyboardIssues, ...ariaIssues, ...focusIssues);
 
   // Track passed checks
-  const totalInputs = element.querySelectorAll('input, select, textarea').length;
-  const inputsWithLabels = issues.filter(i => i.rule === 'missing-label').length;
+  const totalInputs = element.querySelectorAll(
+    'input, select, textarea'
+  ).length;
+  const inputsWithLabels = issues.filter(
+    (i) => i.rule === 'missing-label'
+  ).length;
   if (totalInputs > 0 && inputsWithLabels === 0) {
     passedChecks.push('All form inputs have labels');
   }
 
-  const totalButtons = element.querySelectorAll('button, [role="button"]').length;
-  const buttonsWithoutNames = issues.filter(i => i.rule === 'button-name').length;
+  const totalButtons = element.querySelectorAll(
+    'button, [role="button"]'
+  ).length;
+  const buttonsWithoutNames = issues.filter(
+    (i) => i.rule === 'button-name'
+  ).length;
   if (totalButtons > 0 && buttonsWithoutNames === 0) {
     passedChecks.push('All buttons have accessible names');
   }
@@ -259,22 +286,24 @@ export function auditAccessibility(element: HTMLElement): AccessibilityReport {
   const errorWeight = 3;
   const warningWeight = 1;
 
-  const errorCount = issues.filter(i => i.severity === 'error').length;
-  const warningCount = issues.filter(i => i.severity === 'warning').length;
+  const errorCount = issues.filter((i) => i.severity === 'error').length;
+  const warningCount = issues.filter((i) => i.severity === 'warning').length;
 
-  const penalties = (errorCount * errorWeight) + (warningCount * warningWeight);
-  const score = Math.max(0, 100 - (penalties * 5));
+  const penalties = errorCount * errorWeight + warningCount * warningWeight;
+  const score = Math.max(0, 100 - penalties * 5);
 
   return {
     score,
     issues,
     passedChecks,
-    totalChecks
+    totalChecks,
   };
 }
 
 // Utility to generate accessibility report
-export function generateAccessibilityReport(report: AccessibilityReport): string {
+export function generateAccessibilityReport(
+  report: AccessibilityReport
+): string {
   const { score, issues, passedChecks } = report;
 
   let reportText = `# Accessibility Report\n\n`;
@@ -282,7 +311,7 @@ export function generateAccessibilityReport(report: AccessibilityReport): string
 
   if (passedChecks.length > 0) {
     reportText += `## ✅ Passed Checks (${passedChecks.length})\n`;
-    passedChecks.forEach(check => {
+    passedChecks.forEach((check) => {
       reportText += `- ${check}\n`;
     });
     reportText += '\n';
@@ -291,13 +320,13 @@ export function generateAccessibilityReport(report: AccessibilityReport): string
   if (issues.length > 0) {
     reportText += `## ⚠️ Issues Found (${issues.length})\n\n`;
 
-    const errors = issues.filter(i => i.severity === 'error');
-    const warnings = issues.filter(i => i.severity === 'warning');
-    const info = issues.filter(i => i.severity === 'info');
+    const errors = issues.filter((i) => i.severity === 'error');
+    const warnings = issues.filter((i) => i.severity === 'warning');
+    const info = issues.filter((i) => i.severity === 'info');
 
     if (errors.length > 0) {
       reportText += `### 🚨 Errors (${errors.length})\n`;
-      errors.forEach(issue => {
+      errors.forEach((issue) => {
         reportText += `- **${issue.rule}**: ${issue.message}\n`;
         if (issue.suggestion) {
           reportText += `  - *Suggestion: ${issue.suggestion}*\n`;
@@ -308,7 +337,7 @@ export function generateAccessibilityReport(report: AccessibilityReport): string
 
     if (warnings.length > 0) {
       reportText += `### ⚠️ Warnings (${warnings.length})\n`;
-      warnings.forEach(issue => {
+      warnings.forEach((issue) => {
         reportText += `- **${issue.rule}**: ${issue.message}\n`;
         if (issue.suggestion) {
           reportText += `  - *Suggestion: ${issue.suggestion}*\n`;
@@ -319,7 +348,7 @@ export function generateAccessibilityReport(report: AccessibilityReport): string
 
     if (info.length > 0) {
       reportText += `### ℹ️ Information (${info.length})\n`;
-      info.forEach(issue => {
+      info.forEach((issue) => {
         reportText += `- **${issue.rule}**: ${issue.message}\n`;
         if (issue.suggestion) {
           reportText += `  - *Suggestion: ${issue.suggestion}*\n`;
@@ -365,8 +394,10 @@ export interface AccessibleComponentProps {
 export function detectHighContrast(): boolean {
   if (typeof window === 'undefined') return false;
 
-  return window.matchMedia('(prefers-contrast: high)').matches ||
-         window.matchMedia('(-ms-high-contrast: active)').matches;
+  return (
+    window.matchMedia('(prefers-contrast: high)').matches ||
+    window.matchMedia('(-ms-high-contrast: active)').matches
+  );
 }
 
 // Reduced motion detection

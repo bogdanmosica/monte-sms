@@ -1,7 +1,14 @@
-import { db } from './drizzle';
-import { users, children, observations, portfolioEntries, learningPaths, activityLogs } from './schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { logAuthEvent } from '@/lib/auth/middleware';
+import { db } from './drizzle';
+import {
+  activityLogs,
+  children,
+  learningPaths,
+  observations,
+  portfolioEntries,
+  users,
+} from './schema';
 
 // GDPR Data Categories
 export enum DataCategory {
@@ -70,7 +77,12 @@ export const DATA_MAPPING = {
     legalBasis: LegalBasis.LEGITIMATE_INTERESTS,
     retentionMonths: RETENTION_PERIODS.OBSERVATIONS,
     fields: {
-      educational: ['title', 'description', 'montessoriArea', 'skillsDemonstrated'],
+      educational: [
+        'title',
+        'description',
+        'montessoriArea',
+        'skillsDemonstrated',
+      ],
       media: ['mediaUrls', 'hasPhoto', 'hasVideo'],
       assessment: ['nextSteps', 'developmentalMilestones'],
     },
@@ -80,7 +92,12 @@ export const DATA_MAPPING = {
     legalBasis: LegalBasis.LEGITIMATE_INTERESTS,
     retentionMonths: RETENTION_PERIODS.PORTFOLIO_ENTRIES,
     fields: {
-      educational: ['title', 'description', 'skillsDemonstrated', 'learningObjectives'],
+      educational: [
+        'title',
+        'description',
+        'skillsDemonstrated',
+        'learningObjectives',
+      ],
       media: ['mediaUrls', 'mediaMetadata'],
       reflection: ['childReflection', 'teacherObservation'],
     },
@@ -143,7 +160,8 @@ export interface ConsentRecord {
  * Export all data for a user (GDPR Article 20 - Right to Data Portability)
  */
 export async function exportUserData(request: DataExportRequest): Promise<any> {
-  const { userId, userRole, targetUserId, categories, format, includeDeleted } = request;
+  const { userId, userRole, targetUserId, categories, format, includeDeleted } =
+    request;
 
   // Verify access rights
   if (userRole === 'Parent' && targetUserId && targetUserId !== userId) {
@@ -151,10 +169,7 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
     const childOwnership = await db
       .select({ id: children.id })
       .from(children)
-      .where(and(
-        eq(children.parentId, userId),
-        eq(children.id, targetUserId)
-      ));
+      .where(and(eq(children.parentId, userId), eq(children.id, targetUserId)));
 
     if (!childOwnership.length) {
       throw new Error('Access denied: Cannot export data for this user');
@@ -183,14 +198,17 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
       .from(users)
       .where(eq(users.id, subjectId));
 
-    exportData.data.personalData = userData.map(user => ({
+    exportData.data.personalData = userData.map((user) => ({
       ...user,
       passwordHash: '[REDACTED]', // Never export password hashes
     }));
   }
 
   // Export child data (if user is parent or the child themselves)
-  if (categories.includes(DataCategory.SENSITIVE_DATA) || categories.includes(DataCategory.EDUCATIONAL_DATA)) {
+  if (
+    categories.includes(DataCategory.SENSITIVE_DATA) ||
+    categories.includes(DataCategory.EDUCATIONAL_DATA)
+  ) {
     let childQuery = db.select().from(children);
 
     if (userRole === 'Parent') {
@@ -208,14 +226,16 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
 
     // Export observations for these children
     if (childData.length > 0) {
-      const childIds = childData.map(child => child.id);
+      const childIds = childData.map((child) => child.id);
       const observationsData = await db
         .select()
         .from(observations)
-        .where(and(
-          sql`${observations.childId} = ANY(${childIds})`,
-          includeDeleted ? undefined : eq(observations.deletedAt, null)
-        ));
+        .where(
+          and(
+            sql`${observations.childId} = ANY(${childIds})`,
+            includeDeleted ? undefined : eq(observations.deletedAt, null)
+          )
+        );
 
       exportData.data.observations = observationsData;
 
@@ -223,10 +243,12 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
       const portfolioData = await db
         .select()
         .from(portfolioEntries)
-        .where(and(
-          sql`${portfolioEntries.childId} = ANY(${childIds})`,
-          includeDeleted ? undefined : eq(portfolioEntries.deletedAt, null)
-        ));
+        .where(
+          and(
+            sql`${portfolioEntries.childId} = ANY(${childIds})`,
+            includeDeleted ? undefined : eq(portfolioEntries.deletedAt, null)
+          )
+        );
 
       exportData.data.portfolioEntries = portfolioData;
 
@@ -234,10 +256,12 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
       const learningPathData = await db
         .select()
         .from(learningPaths)
-        .where(and(
-          sql`${learningPaths.childId} = ANY(${childIds})`,
-          includeDeleted ? undefined : eq(learningPaths.deletedAt, null)
-        ));
+        .where(
+          and(
+            sql`${learningPaths.childId} = ANY(${childIds})`,
+            includeDeleted ? undefined : eq(learningPaths.deletedAt, null)
+          )
+        );
 
       exportData.data.learningPaths = learningPathData;
     }
@@ -255,7 +279,11 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
   }
 
   // Log the export request
-  logAuthEvent('LOGIN_SUCCESS', userId, `GDPR data export completed for user ${subjectId}`);
+  logAuthEvent(
+    'LOGIN_SUCCESS',
+    userId,
+    `GDPR data export completed for user ${subjectId}`
+  );
 
   return exportData;
 }
@@ -263,7 +291,9 @@ export async function exportUserData(request: DataExportRequest): Promise<any> {
 /**
  * Delete user data (GDPR Article 17 - Right to Erasure)
  */
-export async function deleteUserData(request: DataDeletionRequest): Promise<void> {
+export async function deleteUserData(
+  request: DataDeletionRequest
+): Promise<void> {
   const { userId, userRole, targetUserId, categories, reason } = request;
 
   const subjectId = targetUserId || userId;
@@ -274,10 +304,7 @@ export async function deleteUserData(request: DataDeletionRequest): Promise<void
     const childOwnership = await db
       .select({ id: children.id })
       .from(children)
-      .where(and(
-        eq(children.parentId, userId),
-        eq(children.id, targetUserId)
-      ));
+      .where(and(eq(children.parentId, userId), eq(children.id, targetUserId)));
 
     if (!childOwnership.length) {
       throw new Error('Access denied: Cannot delete data for this user');
@@ -301,15 +328,22 @@ export async function deleteUserData(request: DataDeletionRequest): Promise<void
     }
 
     // Handle child data deletion
-    if (categories.includes(DataCategory.SENSITIVE_DATA) || categories.includes(DataCategory.EDUCATIONAL_DATA)) {
+    if (
+      categories.includes(DataCategory.SENSITIVE_DATA) ||
+      categories.includes(DataCategory.EDUCATIONAL_DATA)
+    ) {
       // Get children to delete
       const childrenToDelete = await tx
         .select({ id: children.id })
         .from(children)
-        .where(userRole === 'Parent' ? eq(children.parentId, userId) : eq(children.id, subjectId));
+        .where(
+          userRole === 'Parent'
+            ? eq(children.parentId, userId)
+            : eq(children.id, subjectId)
+        );
 
       if (childrenToDelete.length > 0) {
-        const childIds = childrenToDelete.map(child => child.id);
+        const childIds = childrenToDelete.map((child) => child.id);
 
         // Soft delete children
         await tx
@@ -346,7 +380,11 @@ export async function deleteUserData(request: DataDeletionRequest): Promise<void
     });
   });
 
-  logAuthEvent('LOGIN_SUCCESS', userId, `GDPR data deletion completed for user ${subjectId}: ${reason}`);
+  logAuthEvent(
+    'LOGIN_SUCCESS',
+    userId,
+    `GDPR data deletion completed for user ${subjectId}: ${reason}`
+  );
 }
 
 /**
@@ -366,40 +404,48 @@ export async function checkRetentionCompliance(): Promise<void> {
         await db
           .update(children)
           .set({ deletedAt: now })
-          .where(and(
-            eq(children.deletedAt, null),
-            sql`${children.updatedAt} < ${retentionDate}`
-          ));
+          .where(
+            and(
+              eq(children.deletedAt, null),
+              sql`${children.updatedAt} < ${retentionDate}`
+            )
+          );
         break;
 
       case 'observations':
         await db
           .update(observations)
           .set({ deletedAt: now })
-          .where(and(
-            eq(observations.deletedAt, null),
-            sql`${observations.updatedAt} < ${retentionDate}`
-          ));
+          .where(
+            and(
+              eq(observations.deletedAt, null),
+              sql`${observations.updatedAt} < ${retentionDate}`
+            )
+          );
         break;
 
       case 'portfolioEntries':
         await db
           .update(portfolioEntries)
           .set({ deletedAt: now })
-          .where(and(
-            eq(portfolioEntries.deletedAt, null),
-            sql`${portfolioEntries.updatedAt} < ${retentionDate}`
-          ));
+          .where(
+            and(
+              eq(portfolioEntries.deletedAt, null),
+              sql`${portfolioEntries.updatedAt} < ${retentionDate}`
+            )
+          );
         break;
 
       case 'learningPaths':
         await db
           .update(learningPaths)
           .set({ deletedAt: now })
-          .where(and(
-            eq(learningPaths.deletedAt, null),
-            sql`${learningPaths.updatedAt} < ${retentionDate}`
-          ));
+          .where(
+            and(
+              eq(learningPaths.deletedAt, null),
+              sql`${learningPaths.updatedAt} < ${retentionDate}`
+            )
+          );
         break;
 
       case 'activityLogs':
@@ -467,7 +513,11 @@ To exercise your rights, contact: [School Data Protection Officer]
 /**
  * Validate consent for data processing
  */
-export async function validateConsent(userId: number, childId: number, dataCategory: DataCategory): Promise<boolean> {
+export async function validateConsent(
+  userId: number,
+  childId: number,
+  dataCategory: DataCategory
+): Promise<boolean> {
   // In a real implementation, this would check a consent management table
   // For now, we assume consent is given for legitimate educational purposes
 
@@ -482,11 +532,19 @@ export async function validateConsent(userId: number, childId: number, dataCateg
 /**
  * Record consent withdrawal
  */
-export async function withdrawConsent(userId: number, childId: number, dataCategory: DataCategory): Promise<void> {
+export async function withdrawConsent(
+  userId: number,
+  childId: number,
+  dataCategory: DataCategory
+): Promise<void> {
   // In a real implementation, this would update consent records
   // and trigger data processing restrictions
 
-  logAuthEvent('LOGIN_SUCCESS', userId, `Consent withdrawn for ${dataCategory} - Child ${childId}`);
+  logAuthEvent(
+    'LOGIN_SUCCESS',
+    userId,
+    `Consent withdrawn for ${dataCategory} - Child ${childId}`
+  );
 
   // Mark data for restricted processing or deletion
   // Implementation depends on specific consent requirements

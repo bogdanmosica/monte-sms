@@ -22,6 +22,20 @@
       "when": 1758441690219,
       "tag": "0002_sad_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1758546806112,
+      "tag": "0003_superb_silver_samurai",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1758547636110,
+      "tag": "0004_fair_jubilee",
+      "breakpoints": true
     }
   ]
 }

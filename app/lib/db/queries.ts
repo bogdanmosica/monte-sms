@@ -13,8 +13,8 @@ export async function getUser() {
   const sessionData = await verifyToken(sessionCookie.value);
   if (
     !sessionData ||
-    !sessionData.user ||
-    typeof sessionData.user.id !== 'number'
+    !sessionData.userId ||
+    typeof sessionData.userId !== 'number'
   ) {
     return null;
   }
@@ -26,7 +26,7 @@ export async function getUser() {
   const user = await db
     .select()
     .from(users)
-    .where(and(eq(users.id, sessionData.user.id), isNull(users.deletedAt)))
+    .where(and(eq(users.id, sessionData.userId), isNull(users.deletedAt)))
     .limit(1);
 
   if (user.length === 0) {

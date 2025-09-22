@@ -4,7 +4,7 @@
   "description": "Montessori School Management System with enhanced security and role-based access control",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "db:setup": "npx tsx lib/db/setup.ts",

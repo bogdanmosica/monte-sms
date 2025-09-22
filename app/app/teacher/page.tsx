@@ -298,7 +298,7 @@ export default function TeacherDashboard() {
                               {child?.name}
                             </h4>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(observation.date).toLocaleDateString()}
+                              {new Date(observation.date).toLocaleDateString('en-US')}
                             </span>
                           </div>
                         </div>

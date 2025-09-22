@@ -77,7 +77,7 @@ export function withTeam<T>(action: ActionWithTeamFunction<T>) {
 
 // RBAC helper functions for Montessori roles
 export function requireRole(allowedRoles: UserRole[]) {
-  return async (request: Request): Promise<User> => {
+  return async (): Promise<User> => {
     const user = await getUser();
     if (!user) {
       throw new Response('Unauthorized', { status: 401 });
@@ -123,7 +123,7 @@ export function withRole<T>(
   handler: (request: Request, user: User) => Promise<T>
 ) {
   return async (request: Request): Promise<T> => {
-    const user = await requireRole(allowedRoles)(request);
+    const user = await requireRole(allowedRoles)();
     return handler(request, user);
   };
 }
@@ -134,7 +134,21 @@ export function logAuthEvent(
     | 'LOGIN_SUCCESS'
     | 'LOGIN_FAILED'
     | 'ACCESS_DENIED'
-    | 'PERMISSION_ERROR',
+    | 'ACCESS_GRANTED'
+    | 'PERMISSION_ERROR'
+    | 'SETTINGS_ACCESSED'
+    | 'SETTINGS_UPDATED'
+    | 'SCHOOL_SETTINGS_UPDATED'
+    | 'SYSTEM_SETTINGS_UPDATED'
+    | 'SYSTEM_SETTINGS_RESET'
+    | 'SETTINGS_BACKUP_CREATED'
+    | 'STAFF_CREATED'
+    | 'STAFF_UPDATED'
+    | 'STAFF_DELETED'
+    | 'ENROLLMENT_PROCESSED'
+    | 'PAYMENT_CREATED'
+    | 'PAYMENT_UPDATED'
+    | 'REPORT_GENERATED',
   userId?: number,
   details?: string
 ) {

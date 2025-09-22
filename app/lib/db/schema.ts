@@ -27,6 +27,7 @@ import {
 } from './portfolio';
 // Import Montessori-specific models
 import { schools, schoolsRelations } from './school';
+import { payments, paymentsRelations } from './payment';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -195,6 +196,7 @@ export const accessLogsRelations = relations(accessLogs, ({ one }) => ({
 export {
   schools,
   children,
+  payments,
   observations,
   portfolioEntries,
   portfolioCollections,
@@ -204,6 +206,7 @@ export {
   learningPathComments,
   schoolsRelations,
   childrenRelations,
+  paymentsRelations,
   observationsRelations,
   portfolioEntriesRelations,
   portfolioCollectionsRelations,

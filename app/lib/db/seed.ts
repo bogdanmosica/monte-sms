@@ -5,6 +5,7 @@ import {
   children,
   learningPaths,
   observations,
+  payments,
   portfolioEntries,
   schools,
   teamMembers,
@@ -287,6 +288,109 @@ async function seed() {
   ]);
 
   console.log('🛤️ Sample learning paths created');
+
+  // Create sample payments
+  await db.insert(payments).values([
+    {
+      parentId: parentUser.id,
+      childId: child1.id,
+      amount: '850.00',
+      currency: 'USD',
+      type: 'tuition',
+      description: 'September 2024 Tuition - Emma Smith',
+      status: 'paid',
+      dueDate: new Date('2024-09-01'),
+      paidDate: new Date('2024-08-28'),
+      notes: 'Paid via check #1234',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      childId: child2.id,
+      amount: '850.00',
+      currency: 'USD',
+      type: 'tuition',
+      description: 'September 2024 Tuition - Oliver Wilson',
+      status: 'paid',
+      dueDate: new Date('2024-09-01'),
+      paidDate: new Date('2024-08-28'),
+      notes: 'Paid via online portal',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      childId: child1.id,
+      amount: '850.00',
+      currency: 'USD',
+      type: 'tuition',
+      description: 'October 2024 Tuition - Emma Smith',
+      status: 'pending',
+      dueDate: new Date('2024-10-01'),
+      notes: 'Invoice sent via email',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      childId: child2.id,
+      amount: '850.00',
+      currency: 'USD',
+      type: 'tuition',
+      description: 'October 2024 Tuition - Oliver Wilson',
+      status: 'pending',
+      dueDate: new Date('2024-10-01'),
+      notes: 'Invoice sent via email',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      amount: '25.00',
+      currency: 'USD',
+      type: 'materials',
+      description: 'Art supplies fee for September',
+      status: 'paid',
+      dueDate: new Date('2024-09-15'),
+      paidDate: new Date('2024-09-10'),
+      notes: 'Cash payment',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      amount: '45.00',
+      currency: 'USD',
+      type: 'fees',
+      description: 'Field trip to botanical garden',
+      status: 'overdue',
+      dueDate: new Date('2024-09-20'),
+      notes: 'Payment reminder sent',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      childId: child1.id,
+      amount: '120.00',
+      currency: 'USD',
+      type: 'meals',
+      description: 'Lunch program - September 2024',
+      status: 'paid',
+      dueDate: new Date('2024-09-01'),
+      paidDate: new Date('2024-08-30'),
+      notes: 'Monthly lunch plan',
+      createdBy: adminUser.id,
+    },
+    {
+      parentId: parentUser.id,
+      amount: '75.00',
+      currency: 'USD',
+      type: 'activities',
+      description: 'Music class enrollment - Fall semester',
+      status: 'pending',
+      dueDate: new Date('2024-10-15'),
+      notes: 'Optional enrichment program',
+      createdBy: adminUser.id,
+    }
+  ]);
+
+  console.log('💳 Sample payments created');
 
   await createStripeProducts();
 

@@ -3,12 +3,13 @@ import { NextResponse } from 'next/server';
 import { signToken, verifyToken } from '@/lib/auth/session';
 import { AccessEventType, logAccessEvent } from '@/lib/db/access-log';
 import { hasRouteAccess, isProtectedRoute } from '@/lib/db/route';
-import type { UserRole } from '@/lib/db/schema';
+import { UserRole } from '@/lib/db/schema';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const sessionCookie = request.cookies.get('session');
   const isRouteProtected = isProtectedRoute(pathname);
+  const isApiRoute = pathname.startsWith('/api');
 
   // Get client IP and user agent for logging
   const clientIP =
@@ -17,6 +18,61 @@ export async function middleware(request: NextRequest) {
     request.headers.get('x-real-ip') ||
     'unknown';
   const userAgent = request.headers.get('user-agent') || 'unknown';
+
+  // Handle API routes differently - don't redirect, return 401
+  if (isApiRoute && pathname.startsWith('/api/admin')) {
+    if (!sessionCookie) {
+      await logAccessEvent({
+        userId: 'anonymous',
+        routeId: pathname,
+        eventType: AccessEventType.ACCESS_DENIED,
+        ipAddress: clientIP,
+        userAgent,
+        metadata: { reason: 'no_session' },
+      });
+
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+
+    // Verify session for admin API routes
+    try {
+      const parsed = await verifyToken(sessionCookie.value);
+      const userRole = parsed.role as UserRole;
+
+      if (userRole !== UserRole.ADMIN && userRole !== UserRole.OWNER) {
+        await logAccessEvent({
+          userId: parsed.userId?.toString() || 'unknown',
+          routeId: pathname,
+          eventType: AccessEventType.ACCESS_DENIED,
+          ipAddress: clientIP,
+          userAgent,
+          metadata: { reason: 'insufficient_role', userRole },
+        });
+
+        return new NextResponse('Forbidden', { status: 403 });
+      }
+
+      // Admin access granted, continue
+      await logAccessEvent({
+        userId: parsed.userId?.toString() || 'unknown',
+        routeId: pathname,
+        eventType: AccessEventType.ACCESS_GRANTED,
+        ipAddress: clientIP,
+        userAgent,
+        metadata: { userRole },
+      });
+
+      return NextResponse.next();
+    } catch (error) {
+      console.error('Error verifying admin API session:', error);
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+  }
+
+  // Skip middleware for non-admin API routes
+  if (isApiRoute) {
+    return NextResponse.next();
+  }
 
   // If route is protected and no session exists, redirect to sign-in
   if (isRouteProtected && !sessionCookie) {
@@ -140,6 +196,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
   runtime: 'nodejs',
 };

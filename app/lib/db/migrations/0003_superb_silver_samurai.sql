@@ -1,0 +1,23 @@
+CREATE TABLE "payments" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"parent_id" integer NOT NULL,
+	"child_id" integer,
+	"amount" numeric(10, 2) NOT NULL,
+	"currency" varchar(3) DEFAULT 'USD',
+	"type" "payment_type" NOT NULL,
+	"description" text NOT NULL,
+	"status" "payment_status" DEFAULT 'pending',
+	"due_date" timestamp NOT NULL,
+	"paid_date" timestamp,
+	"stripe_payment_intent_id" varchar(255),
+	"stripe_customer_id" varchar(255),
+	"notes" text,
+	"created_by" integer,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"deleted_at" timestamp
+);
+--> statement-breakpoint
+ALTER TABLE "payments" ADD CONSTRAINT "payments_parent_id_users_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "payments" ADD CONSTRAINT "payments_child_id_children_id_fk" FOREIGN KEY ("child_id") REFERENCES "public"."children"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "payments" ADD CONSTRAINT "payments_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;

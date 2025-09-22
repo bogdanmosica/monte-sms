@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
 import { Loader2 } from 'lucide-react';
-import type { User } from '@/lib/db/schema';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 import { getRoleBasedRedirectPath } from '@/lib/auth/redirect';
+import type { User } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -40,7 +40,9 @@ export default function RootPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Redirecting to sign in...</p>
+          <p className="text-muted-foreground mb-4">
+            Redirecting to sign in...
+          </p>
           <Loader2 className="w-6 h-6 animate-spin mx-auto" />
         </div>
       </div>
@@ -51,7 +53,9 @@ export default function RootPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground mb-4">Redirecting to dashboard...</p>
+          <p className="text-muted-foreground mb-4">
+            Redirecting to dashboard...
+          </p>
           <Loader2 className="w-6 h-6 animate-spin mx-auto" />
         </div>
       </div>

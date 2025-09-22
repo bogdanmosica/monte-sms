@@ -50,7 +50,9 @@ export const portfolioEntries = pgTable('portfolio_entries', {
   semester: varchar('semester', { length: 20 }), // Fall, Spring, Summer
 
   // Connection to observations
-  linkedObservationId: integer('linked_observation_id').references(() => observations.id),
+  linkedObservationId: integer('linked_observation_id').references(
+    () => observations.id
+  ),
 
   // Privacy and sharing
   isVisibleToParents: boolean('is_visible_to_parents').default(true),
@@ -103,46 +105,55 @@ export const portfolioCollections = pgTable('portfolio_collections', {
 });
 
 // Junction table linking entries to collections
-export const portfolioCollectionEntries = pgTable('portfolio_collection_entries', {
-  id: serial('id').primaryKey(),
-  collectionId: integer('collection_id')
-    .notNull()
-    .references(() => portfolioCollections.id),
-  entryId: integer('entry_id')
-    .notNull()
-    .references(() => portfolioEntries.id),
-  displayOrder: integer('display_order').default(0),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+export const portfolioCollectionEntries = pgTable(
+  'portfolio_collection_entries',
+  {
+    id: serial('id').primaryKey(),
+    collectionId: integer('collection_id')
+      .notNull()
+      .references(() => portfolioCollections.id),
+    entryId: integer('entry_id')
+      .notNull()
+      .references(() => portfolioEntries.id),
+    displayOrder: integer('display_order').default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  }
+);
 
 // Relations
-export const portfolioEntriesRelations = relations(portfolioEntries, ({ one, many }) => ({
-  child: one(children, {
-    fields: [portfolioEntries.childId],
-    references: [children.id],
-  }),
-  createdBy: one(users, {
-    fields: [portfolioEntries.createdById],
-    references: [users.id],
-  }),
-  linkedObservation: one(observations, {
-    fields: [portfolioEntries.linkedObservationId],
-    references: [observations.id],
-  }),
-  collectionEntries: many(portfolioCollectionEntries),
-}));
+export const portfolioEntriesRelations = relations(
+  portfolioEntries,
+  ({ one, many }) => ({
+    child: one(children, {
+      fields: [portfolioEntries.childId],
+      references: [children.id],
+    }),
+    createdBy: one(users, {
+      fields: [portfolioEntries.createdById],
+      references: [users.id],
+    }),
+    linkedObservation: one(observations, {
+      fields: [portfolioEntries.linkedObservationId],
+      references: [observations.id],
+    }),
+    collectionEntries: many(portfolioCollectionEntries),
+  })
+);
 
-export const portfolioCollectionsRelations = relations(portfolioCollections, ({ one, many }) => ({
-  child: one(children, {
-    fields: [portfolioCollections.childId],
-    references: [children.id],
-  }),
-  createdBy: one(users, {
-    fields: [portfolioCollections.createdById],
-    references: [users.id],
-  }),
-  entries: many(portfolioCollectionEntries),
-}));
+export const portfolioCollectionsRelations = relations(
+  portfolioCollections,
+  ({ one, many }) => ({
+    child: one(children, {
+      fields: [portfolioCollections.childId],
+      references: [children.id],
+    }),
+    createdBy: one(users, {
+      fields: [portfolioCollections.createdById],
+      references: [users.id],
+    }),
+    entries: many(portfolioCollectionEntries),
+  })
+);
 
 export const portfolioCollectionEntriesRelations = relations(
   portfolioCollectionEntries,
@@ -163,7 +174,8 @@ export type PortfolioEntry = typeof portfolioEntries.$inferSelect;
 export type NewPortfolioEntry = typeof portfolioEntries.$inferInsert;
 export type PortfolioCollection = typeof portfolioCollections.$inferSelect;
 export type NewPortfolioCollection = typeof portfolioCollections.$inferInsert;
-export type PortfolioCollectionEntry = typeof portfolioCollectionEntries.$inferSelect;
+export type PortfolioCollectionEntry =
+  typeof portfolioCollectionEntries.$inferSelect;
 
 // Extended types
 export type PortfolioEntryWithDetails = PortfolioEntry & {

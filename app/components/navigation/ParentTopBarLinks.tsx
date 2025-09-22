@@ -43,9 +43,7 @@ export function ParentTopBarLinks() {
             href={item.href}
             className={cn(
               'flex items-center space-x-2 text-sm font-medium transition-colors hover:text-emerald-600',
-              isActive
-                ? 'text-emerald-600'
-                : 'text-gray-600'
+              isActive ? 'text-emerald-600' : 'text-gray-600'
             )}
           >
             <Icon className="h-4 w-4" />

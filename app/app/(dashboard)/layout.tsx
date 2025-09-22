@@ -14,8 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { User } from '@/lib/db/schema';
 import { getRoleBasedRedirectPath } from '@/lib/auth/redirect';
+import type { User } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -53,7 +53,10 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="flex flex-col gap-1">
         <DropdownMenuItem className="cursor-pointer">
-          <Link href={getRoleBasedRedirectPath(user.role)} className="flex w-full items-center">
+          <Link
+            href={getRoleBasedRedirectPath(user.role)}
+            className="flex w-full items-center"
+          >
             <Home className="mr-2 h-4 w-4" />
             <span>Home</span>
           </Link>
@@ -77,7 +80,9 @@ function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <GraduationCap className="h-7 w-7 text-emerald-600" />
-          <span className="ml-2 text-xl font-semibold text-gray-900">Montessori Academy</span>
+          <span className="ml-2 text-xl font-semibold text-gray-900">
+            Montessori Academy
+          </span>
         </Link>
         <div className="flex items-center space-x-4">
           <Suspense fallback={<div className="h-9" />}>

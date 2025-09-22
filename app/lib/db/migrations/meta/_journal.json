@@ -15,6 +15,13 @@
       "when": 1758397547061,
       "tag": "0001_cheerful_surge",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758441690219,
+      "tag": "0002_sad_mauler",
+      "breakpoints": true
     }
   ]
 }

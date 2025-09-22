@@ -84,7 +84,9 @@ export function requireRole(allowedRoles: UserRole[]) {
     }
 
     if (!allowedRoles.includes(user.role as UserRole)) {
-      throw new Response('Forbidden: Insufficient permissions', { status: 403 });
+      throw new Response('Forbidden: Insufficient permissions', {
+        status: 403,
+      });
     }
 
     return user;
@@ -128,7 +130,11 @@ export function withRole<T>(
 
 // Error logging for authentication events
 export function logAuthEvent(
-  event: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'ACCESS_DENIED' | 'PERMISSION_ERROR',
+  event:
+    | 'LOGIN_SUCCESS'
+    | 'LOGIN_FAILED'
+    | 'ACCESS_DENIED'
+    | 'PERMISSION_ERROR',
   userId?: number,
   details?: string
 ) {

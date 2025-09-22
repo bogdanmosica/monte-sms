@@ -25,7 +25,8 @@
       "Bash(pnpm db:seed:*)",
       "Bash(dir:*)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(pnpm lint:fix:*)"
     ],
     "deny": [],
     "ask": []

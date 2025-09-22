@@ -8,7 +8,6 @@ import {
   MessageCircle,
   TrendingUp,
 } from 'lucide-react';
-import { UserRole } from '@/lib/db/schema';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserRole } from '@/lib/db/schema';
 import {
   getActivitiesByChild,
   getChildrenByParent,

@@ -21,16 +21,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { UserRole } from '@/lib/db/schema';
 import {
   mockActivities,
   mockChildren,
   mockObservations,
   mockUsers,
 } from '@/lib/mock-data';
-import { UserRole } from '@/lib/db/schema';
 
 export default function TeacherDashboard() {
-  const currentTeacher = mockUsers.find((user) => user.role === UserRole.TEACHER);
+  const currentTeacher = mockUsers.find(
+    (user) => user.role === UserRole.TEACHER
+  );
   const classroomChildren = mockChildren.filter(
     (child) => child.classroom === 'Primary A'
   );
@@ -296,7 +298,7 @@ export default function TeacherDashboard() {
                               {child?.name}
                             </h4>
                             <span className="text-xs text-muted-foreground">
-                              {new Date(observation.date).toLocaleDateString()}
+                              {new Date(observation.date).toLocaleDateString('en-US')}
                             </span>
                           </div>
                         </div>

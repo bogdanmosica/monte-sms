@@ -11,7 +11,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-
 // Mock events data
 const mockEvents = [
   {

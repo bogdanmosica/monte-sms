@@ -7,7 +7,9 @@ export default function NotFound() {
       <div className="max-w-md space-y-8 p-4 text-center">
         <div className="flex flex-col items-center">
           <GraduationCap className="size-12 text-emerald-600" />
-          <div className="mt-2 text-lg font-semibold text-gray-900">Montessori Academy</div>
+          <div className="mt-2 text-lg font-semibold text-gray-900">
+            Montessori Academy
+          </div>
         </div>
         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
           Page Not Found

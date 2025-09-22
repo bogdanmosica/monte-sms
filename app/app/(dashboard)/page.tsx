@@ -1,24 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import useSWR from 'swr';
-import { UserRole } from '@/lib/db/schema';
 import {
-  BookOpen,
-  Users,
-  MessageCircle,
-  TrendingUp,
-  Settings,
-  Calendar,
   Award,
+  BookOpen,
+  Calendar,
   Clock,
-  Loader2
+  Loader2,
+  MessageCircle,
+  Settings,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import useSWR from 'swr';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import type { User } from '@/lib/db/schema';
+import { UserRole } from '@/lib/db/schema';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -26,7 +26,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const roleConfigs = {
   Parent: {
     title: 'Parent Dashboard',
-    description: 'Track your child\'s learning journey and development',
+    description: "Track your child's learning journey and development",
     primaryAction: { label: 'View Portfolio', href: '/parent/portfolio' },
     quickActions: [
       { label: 'Child Portfolio', href: '/parent/portfolio', icon: BookOpen },
@@ -36,17 +36,23 @@ const roleConfigs = {
   },
   Teacher: {
     title: 'Teacher Dashboard',
-    description: 'Manage observations, track student progress, and plan activities',
+    description:
+      'Manage observations, track student progress, and plan activities',
     primaryAction: { label: 'Log Observation', href: '/teacher/observations' },
     quickActions: [
       { label: 'Students', href: '/teacher/students', icon: Users },
-      { label: 'Observations', href: '/teacher/observations', icon: MessageCircle },
+      {
+        label: 'Observations',
+        href: '/teacher/observations',
+        icon: MessageCircle,
+      },
       { label: 'Kanban Board', href: '/teacher/kanban', icon: TrendingUp },
     ],
   },
   Admin: {
     title: 'Admin Dashboard',
-    description: 'Oversee school operations, manage staff, and track performance',
+    description:
+      'Oversee school operations, manage staff, and track performance',
     primaryAction: { label: 'School Management', href: '/admin' },
     quickActions: [
       { label: 'Enrollment', href: '/admin/enrollment', icon: Users },
@@ -57,7 +63,8 @@ const roleConfigs = {
   // Map 'owner' role from SaaS starter to Admin functionality
   owner: {
     title: 'School Owner Dashboard',
-    description: 'Oversee school operations, manage staff, and track performance',
+    description:
+      'Oversee school operations, manage staff, and track performance',
     primaryAction: { label: 'School Management', href: '/admin' },
     quickActions: [
       { label: 'Enrollment', href: '/admin/enrollment', icon: Users },
@@ -109,9 +116,7 @@ function RoleDashboard({ user }: { user: User }) {
           <h1 className="text-3xl font-bold text-foreground">
             Welcome back, {user.name}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            {config.description}
-          </p>
+          <p className="text-muted-foreground mt-1">{config.description}</p>
         </div>
         <Button
           onClick={() => router.push(config.primaryAction.href)}
@@ -174,12 +179,16 @@ function RoleDashboard({ user }: { user: User }) {
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>New portfolio entry added for your child</span>
-                  <span className="text-muted-foreground ml-auto">2 hours ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    2 hours ago
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Teacher observation: Practical Life activity</span>
-                  <span className="text-muted-foreground ml-auto">1 day ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    1 day ago
+                  </span>
                 </div>
               </>
             )}
@@ -189,12 +198,16 @@ function RoleDashboard({ user }: { user: User }) {
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>5 new observations logged today</span>
-                  <span className="text-muted-foreground ml-auto">Just now</span>
+                  <span className="text-muted-foreground ml-auto">
+                    Just now
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Portfolio entries created for 3 students</span>
-                  <span className="text-muted-foreground ml-auto">2 hours ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    2 hours ago
+                  </span>
                 </div>
               </>
             )}
@@ -204,12 +217,16 @@ function RoleDashboard({ user }: { user: User }) {
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span>3 new enrollment applications received</span>
-                  <span className="text-muted-foreground ml-auto">1 hour ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    1 hour ago
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>Monthly tuition payments processed</span>
-                  <span className="text-muted-foreground ml-auto">3 hours ago</span>
+                  <span className="text-muted-foreground ml-auto">
+                    3 hours ago
+                  </span>
                 </div>
               </>
             )}
@@ -273,9 +290,7 @@ export default function HomePage() {
             <p className="text-muted-foreground mb-4">
               Unable to load dashboard. Please try again.
             </p>
-            <Button onClick={() => window.location.reload()}>
-              Reload
-            </Button>
+            <Button onClick={() => window.location.reload()}>Reload</Button>
           </CardContent>
         </Card>
       </div>

@@ -25,7 +25,9 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex flex-col items-center">
           <GraduationCap className="h-12 w-12 text-emerald-600" />
-          <div className="mt-2 text-lg font-semibold text-gray-900">Montessori Academy</div>
+          <div className="mt-2 text-lg font-semibold text-gray-900">
+            Montessori Academy
+          </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           {mode === 'signin'
@@ -34,8 +36,8 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           {mode === 'signin'
-            ? 'Sign in to access your child\'s learning journey'
-            : 'Create an account to connect with your child\'s education'}
+            ? "Sign in to access your child's learning journey"
+            : "Create an account to connect with your child's education"}
         </p>
       </div>
 

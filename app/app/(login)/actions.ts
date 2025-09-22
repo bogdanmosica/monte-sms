@@ -8,6 +8,7 @@ import {
   validatedAction,
   validatedActionWithUser,
 } from '@/lib/auth/middleware';
+import { getRoleBasedRedirectPath } from '@/lib/auth/redirect';
 import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
 import { db } from '@/lib/db/drizzle';
 import { getUser, getUserWithTeam } from '@/lib/db/queries';
@@ -26,7 +27,6 @@ import {
   users,
 } from '@/lib/db/schema';
 import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getRoleBasedRedirectPath } from '@/lib/auth/redirect';
 
 async function logActivity(
   teamId: number | null | undefined,

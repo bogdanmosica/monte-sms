@@ -50,7 +50,7 @@ describe('Authentication API Contract Tests', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: 'test@test.com',
-          password: 'admin123'
+          password: 'admin123',
         }),
       });
 
@@ -79,7 +79,7 @@ describe('Authentication API Contract Tests', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: 'test@test.com',
-          password: 'wrongpassword'
+          password: 'wrongpassword',
         }),
       });
 
@@ -133,7 +133,7 @@ describe('Authentication API Contract Tests', () => {
       });
 
       const response = await fetch('/api/user/me', {
-        headers: { 'Cookie': 'session=valid-token' }
+        headers: { Cookie: 'session=valid-token' },
       });
 
       const data = await response.json();
@@ -176,7 +176,7 @@ describe('Parent Access Control Tests', () => {
       });
 
       const response = await fetch('/api/children', {
-        headers: { 'Cookie': 'session=parent-token' }
+        headers: { Cookie: 'session=parent-token' },
       });
 
       const data = await response.json();
@@ -195,7 +195,7 @@ describe('Parent Access Control Tests', () => {
       });
 
       const response = await fetch('/api/children?parentId=other-parent', {
-        headers: { 'Cookie': 'session=parent-token' }
+        headers: { Cookie: 'session=parent-token' },
       });
 
       const data = await response.json();
@@ -225,7 +225,7 @@ describe('Parent Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/billing', {
-        headers: { 'Cookie': 'session=parent-token' }
+        headers: { Cookie: 'session=parent-token' },
       });
 
       expect(response.status).toBe(403);
@@ -239,7 +239,7 @@ describe('Parent Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/staff', {
-        headers: { 'Cookie': 'session=parent-token' }
+        headers: { Cookie: 'session=parent-token' },
       });
 
       expect(response.status).toBe(403);
@@ -263,14 +263,16 @@ describe('Teacher Access Control Tests', () => {
       });
 
       const response = await fetch('/api/children', {
-        headers: { 'Cookie': 'session=teacher-token' }
+        headers: { Cookie: 'session=teacher-token' },
       });
 
       const data = await response.json();
 
       expect(response.ok).toBe(true);
       expect(data).toHaveLength(2);
-      expect(data.every((child: any) => child.schoolId === 'school-1')).toBe(true);
+      expect(data.every((child: any) => child.schoolId === 'school-1')).toBe(
+        true
+      );
     });
 
     it('should prevent teacher from accessing other schools data', async () => {
@@ -281,7 +283,7 @@ describe('Teacher Access Control Tests', () => {
       });
 
       const response = await fetch('/api/children?schoolId=other-school', {
-        headers: { 'Cookie': 'session=teacher-token' }
+        headers: { Cookie: 'session=teacher-token' },
       });
 
       expect(response.status).toBe(403);
@@ -297,7 +299,7 @@ describe('Teacher Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/billing', {
-        headers: { 'Cookie': 'session=teacher-token' }
+        headers: { Cookie: 'session=teacher-token' },
       });
 
       expect(response.status).toBe(403);
@@ -311,7 +313,7 @@ describe('Teacher Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/staff', {
-        headers: { 'Cookie': 'session=teacher-token' }
+        headers: { Cookie: 'session=teacher-token' },
       });
 
       expect(response.status).toBe(403);
@@ -327,7 +329,7 @@ describe('Unauthorized User Redirect Tests', () => {
         ok: false,
         status: 302,
         headers: new Headers({
-          'Location': '/sign-in'
+          Location: '/sign-in',
         }),
       });
 
@@ -342,7 +344,7 @@ describe('Unauthorized User Redirect Tests', () => {
         status: 401,
         json: async () => ({
           error: 'Unauthorized',
-          redirect: '/sign-in'
+          redirect: '/sign-in',
         }),
       });
 
@@ -395,7 +397,7 @@ describe('Admin-Only Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/billing', {
-        headers: { 'Cookie': 'session=admin-token' }
+        headers: { Cookie: 'session=admin-token' },
       });
 
       const data = await response.json();
@@ -413,7 +415,7 @@ describe('Admin-Only Access Control Tests', () => {
       });
 
       const response = await fetch('/api/admin/billing', {
-        headers: { 'Cookie': 'session=teacher-token' }
+        headers: { Cookie: 'session=teacher-token' },
       });
 
       expect(response.status).toBe(403);

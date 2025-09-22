@@ -6,7 +6,8 @@ import { getTeamForUser, getUser } from '@/lib/db/queries';
 
 export const metadata: Metadata = {
   title: 'Montessori Academy - School Management Portal',
-  description: 'Connect with your child\'s learning journey through our comprehensive Montessori school management platform.',
+  description:
+    "Connect with your child's learning journey through our comprehensive Montessori school management platform.",
 };
 
 export const viewport: Viewport = {

@@ -1,7 +1,10 @@
 {
+  "name": "monte-sms",
+  "version": "2.0.0",
+  "description": "Montessori School Management System with enhanced security and role-based access control",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "db:setup": "npx tsx lib/db/setup.ts",
@@ -15,7 +18,9 @@
     "check": "biome check --write .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:security": "vitest run __tests__/middleware-role-access.test.ts",
+    "db:logs": "npx tsx -e \"import { getRecentAccessLogs } from './lib/db/access-log'; getRecentAccessLogs(20).then(console.log)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

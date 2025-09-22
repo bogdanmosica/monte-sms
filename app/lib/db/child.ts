@@ -10,8 +10,8 @@ import {
   timestamp,
   varchar,
 } from 'drizzle-orm/pg-core';
-import { schools } from './school';
 import { users } from './schema';
+import { schools } from './school';
 
 export const children = pgTable('children', {
   id: serial('id').primaryKey(),
@@ -36,14 +36,18 @@ export const children = pgTable('children', {
     .references(() => users.id), // Primary parent/guardian
 
   // Montessori-specific fields
-  montessoriLevel: varchar('montessori_level', { length: 50 }).default('Primary'), // Primary, Elementary, etc.
+  montessoriLevel: varchar('montessori_level', { length: 50 }).default(
+    'Primary'
+  ), // Primary, Elementary, etc.
   currentClassroom: varchar('current_classroom', { length: 100 }), // Classroom assignment
   startDate: date('start_date').notNull(), // When child started at school
 
   // Status and settings
   isActive: boolean('is_active').default(true),
   canReceivePhotos: boolean('can_receive_photos').default(true), // Parent consent for photos
-  canParticipateInActivities: boolean('can_participate_in_activities').default(true),
+  canParticipateInActivities: boolean('can_participate_in_activities').default(
+    true
+  ),
 
   // Additional notes
   notes: text('notes'), // General notes from teachers/admin

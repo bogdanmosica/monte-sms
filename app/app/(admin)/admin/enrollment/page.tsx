@@ -1,98 +1,321 @@
 'use client';
 
-import {
-  Calendar,
-  DollarSign,
-  FileText,
-  Filter,
-  Mail,
-  MapPin,
-  Phone,
-  Search,
-  Settings,
-  TrendingUp,
-  UserPlus,
-  Users,
-} from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from 'react';
+import { UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockChildren } from '@/lib/mock-data';
+import { EnrollmentStats } from './components/EnrollmentStats';
+import { SearchAndFilter } from './components/SearchAndFilter';
+import { EnrollmentTabs } from './components/EnrollmentTabs';
+import { toast } from 'sonner';
 
-// Mock enrollment applications
-const mockApplications = [
-  {
-    id: '1',
-    childName: 'Oliver Thompson',
-    parentName: 'Jennifer Thompson',
-    email: 'jennifer.thompson@email.com',
-    phone: '(555) 123-4567',
-    address: '456 Oak Street, Education City, EC 12345',
-    birthdate: '2019-05-12',
-    age: 4,
-    appliedDate: '2024-01-10',
-    status: 'pending',
-    preferredStartDate: '2024-02-01',
-    notes:
-      'Child has previous Montessori experience. Parent interested in full-day program.',
-  },
-  {
-    id: '2',
-    childName: 'Ava Martinez',
-    parentName: 'Carlos Martinez',
-    email: 'carlos.martinez@email.com',
-    phone: '(555) 234-5678',
-    address: '789 Pine Avenue, Education City, EC 12345',
-    birthdate: '2018-09-22',
-    age: 5,
-    appliedDate: '2024-01-08',
-    status: 'approved',
-    preferredStartDate: '2024-01-22',
-    notes:
-      'Family relocating from another state. Excellent references from previous school.',
-  },
-  {
-    id: '3',
-    childName: 'Noah Wilson',
-    parentName: 'Sarah Wilson',
-    email: 'sarah.wilson@email.com',
-    phone: '(555) 345-6789',
-    address: '321 Elm Drive, Education City, EC 12345',
-    birthdate: '2019-12-03',
-    age: 4,
-    appliedDate: '2024-01-05',
-    status: 'interview_scheduled',
-    preferredStartDate: '2024-02-15',
-    notes: 'Parent tour completed. Interview scheduled for next week.',
-  },
-];
+interface ApplicationData {
+  id: string;
+  childName: string;
+  parentName: string;
+  email: string;
+  phone: string;
+  address: string;
+  birthdate: string;
+  age: number;
+  appliedDate: string;
+  status: string;
+  preferredStartDate: string;
+  notes?: string;
+}
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'bg-primary/20 text-primary border-primary/30';
-    case 'approved':
-      return 'bg-accent/20 text-accent border-accent/30';
-    case 'interview_scheduled':
-      return 'bg-secondary/20 text-secondary-foreground border-secondary/30';
-    case 'rejected':
-      return 'bg-destructive/20 text-destructive border-destructive/30';
-    default:
-      return 'bg-muted text-muted-foreground border-muted';
-  }
-};
+interface StudentData {
+  id: string;
+  name: string;
+  age: number;
+  classroom: string;
+}
+
+interface EnrollmentStatsData {
+  totalActive: number;
+  pending: number;
+  approvedThisMonth: number;
+  capacity: number;
+}
 
 export default function AdminEnrollment() {
-  const currentStudents = mockChildren;
-  const pendingApplications = mockApplications.filter(
-    (app) => app.status === 'pending'
+  const [applications, setApplications] = useState<ApplicationData[]>([]);
+  const [students, setStudents] = useState<StudentData[]>([]);
+  const [stats, setStats] = useState<EnrollmentStatsData>({
+    totalActive: 0,
+    pending: 0,
+    approvedThisMonth: 0,
+    capacity: 50, // Will be updated with actual capacity from database
+  });
+  const [loading, setLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState('');
+
+  // Fetch enrollment metrics from admin metrics API
+  const fetchEnrollmentMetrics = async () => {
+    try {
+      const response = await fetch('/api/admin/metrics');
+      if (!response.ok) {
+        console.warn('Could not fetch enrollment metrics, using defaults');
+        return {
+          capacity: 50,
+          pendingApplications: 0,
+          approvedThisMonth: 0,
+          totalStudents: 0,
+        };
+      }
+
+      const data = await response.json();
+      return {
+        capacity: data.enrollment?.capacity || 50,
+        pendingApplications: data.enrollment?.pendingApplications || 0,
+        approvedThisMonth: data.enrollment?.approvedThisMonth || 0,
+        totalStudents: data.enrollment?.totalStudents || 0,
+      };
+    } catch (error) {
+      console.warn('Error fetching enrollment metrics:', error);
+      return {
+        capacity: 50,
+        pendingApplications: 0,
+        approvedThisMonth: 0,
+        totalStudents: 0,
+      };
+    }
+  };
+
+  // Fetch applications data
+  const fetchApplications = async () => {
+    try {
+      const response = await fetch('/api/applications');
+      if (!response.ok) {
+        console.error('Applications API returned error:', response.status, response.statusText);
+        throw new Error(`Failed to fetch applications: ${response.status}`);
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError);
+        throw new Error('Invalid response format');
+      }
+
+      // Ensure data.applications exists and is an array
+      if (!data.applications || !Array.isArray(data.applications)) {
+        console.warn('No applications data found in response:', data);
+        setApplications([]);
+        return;
+      }
+
+      // Transform API data to match component interface
+      const transformedApplications = data.applications.map((app: any) => ({
+        id: app.id.toString(),
+        childName: app.childName,
+        parentName: app.parentName,
+        email: app.email,
+        phone: app.phone,
+        address: app.address,
+        birthdate: app.childBirthDate,
+        age: calculateAge(app.childBirthDate),
+        appliedDate: app.submittedAt,
+        status: app.status,
+        preferredStartDate: app.preferredStartDate,
+        notes: app.notes,
+      }));
+
+      setApplications(transformedApplications);
+
+      // Get actual enrollment metrics from admin API
+      const enrollmentMetrics = await fetchEnrollmentMetrics();
+
+      // Update stats with real database metrics
+      setStats({
+        totalActive: enrollmentMetrics.totalStudents,
+        pending: enrollmentMetrics.pendingApplications,
+        approvedThisMonth: enrollmentMetrics.approvedThisMonth,
+        capacity: enrollmentMetrics.capacity,
+      });
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      setApplications([]); // Set empty array on error
+      toast.error('Failed to load applications data');
+    }
+  };
+
+  // Fetch students data
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch('/api/students?active=true');
+      if (!response.ok) throw new Error('Failed to fetch students');
+
+      const data = await response.json();
+
+      // Ensure data.students exists and is an array
+      if (!data.students || !Array.isArray(data.students)) {
+        console.warn('No students data found in response:', data);
+        setStudents([]);
+        return;
+      }
+
+      // Transform API data to match component interface
+      const transformedStudents = data.students.map((student: any) => ({
+        id: student.id.toString(),
+        name: student.name || `${student.firstName} ${student.lastName}`,
+        age: student.age,
+        classroom: student.currentClassroom || 'Unassigned',
+      }));
+
+      setStudents(transformedStudents);
+
+      // Get enrollment metrics to ensure consistency
+      const enrollmentMetrics = await fetchEnrollmentMetrics();
+
+      // Update stats with consistent database metrics
+      setStats(prev => ({
+        ...prev,
+        totalActive: enrollmentMetrics.totalStudents,
+        pending: enrollmentMetrics.pendingApplications,
+        approvedThisMonth: enrollmentMetrics.approvedThisMonth,
+        capacity: enrollmentMetrics.capacity,
+      }));
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      setStudents([]); // Set empty array on error
+      toast.error('Failed to load students data');
+    }
+  };
+
+  // Calculate age from birthdate
+  const calculateAge = (birthdate: string): number => {
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+
+      // Fetch enrollment metrics first to ensure they're available for calculations
+      const enrollmentMetrics = await fetchEnrollmentMetrics();
+      setStats(prev => ({
+        ...prev,
+        totalActive: enrollmentMetrics.totalStudents,
+        pending: enrollmentMetrics.pendingApplications,
+        approvedThisMonth: enrollmentMetrics.approvedThisMonth,
+        capacity: enrollmentMetrics.capacity,
+      }));
+
+      // Then fetch applications and students data
+      await Promise.all([fetchApplications(), fetchStudents()]);
+      setLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // Handle application actions
+  const handleViewApplication = async (id: string) => {
+    try {
+      const response = await fetch(`/api/applications/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch application');
+
+      const data = await response.json();
+      // TODO: Open application detail modal/page
+      console.log('Application details:', data.application);
+
+      toast.success('Application details loaded');
+    } catch (error) {
+      toast.error('Failed to load application details');
+    }
+  };
+
+  const handleScheduleInterview = async (id: string) => {
+    // TODO: Open interview scheduling modal
+    console.log('Schedule interview for application:', id);
+    toast.info('Interview scheduling will be available soon');
+  };
+
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await fetch(`/api/applications/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'approved' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to approve application');
+
+      // Refresh data
+      await fetchApplications();
+
+      toast.success('Application approved successfully');
+    } catch (error) {
+      toast.error('Failed to approve application');
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      const response = await fetch(`/api/applications/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'rejected' }),
+      });
+
+      if (!response.ok) throw new Error('Failed to reject application');
+
+      // Refresh data
+      await fetchApplications();
+
+      toast.success('Application rejected');
+    } catch (error) {
+      toast.error('Failed to reject application');
+    }
+  };
+
+  const handleViewProfile = async (id: string) => {
+    // TODO: Navigate to student profile page
+    console.log('View student profile:', id);
+    toast.info('Student profiles will be available soon');
+  };
+
+  const handleContactParent = async (id: string) => {
+    // TODO: Open parent contact modal
+    console.log('Contact parent for student:', id);
+    toast.info('Parent contact features will be available soon');
+  };
+
+  const handleEditDetails = async (id: string) => {
+    // TODO: Open student edit modal
+    console.log('Edit student details:', id);
+    toast.info('Student editing will be available soon');
+  };
+
+  // Filter applications based on search
+  const filteredApplications = applications.filter(app =>
+    searchValue === '' ||
+    app.childName.toLowerCase().includes(searchValue.toLowerCase()) ||
+    app.parentName.toLowerCase().includes(searchValue.toLowerCase()) ||
+    app.email.toLowerCase().includes(searchValue.toLowerCase())
   );
-  const approvedApplications = mockApplications.filter(
-    (app) => app.status === 'approved'
-  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading enrollment data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -115,278 +338,32 @@ export default function AdminEnrollment() {
           </div>
 
           {/* Enrollment Stats */}
-          <div className="grid md:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Current Students
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {currentStudents.length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Active enrollments
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Pending Applications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {pendingApplications.length}
-                </div>
-                <p className="text-xs text-muted-foreground">Awaiting review</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Approved This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {approvedApplications.length}
-                </div>
-                <p className="text-xs text-muted-foreground">Ready to enroll</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Available Spots
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-foreground">
-                  {50 - currentStudents.length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Out of 50 capacity
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          <EnrollmentStats
+            currentStudents={stats.totalActive}
+            pendingApplications={stats.pending}
+            approvedApplications={stats.approvedThisMonth}
+            totalCapacity={stats.capacity}
+          />
 
           {/* Search and Filter */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Input
-                    placeholder="Search by child name, parent name, or email..."
-                    className="w-full"
-                  />
-                </div>
-                <Button variant="outline">
-                  <Search className="w-4 h-4" />
-                </Button>
-                <Button variant="outline">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SearchAndFilter
+            searchValue={searchValue}
+            onSearchChange={setSearchValue}
+            placeholder="Search by child name, parent name, or email..."
+          />
 
           {/* Enrollment Tabs */}
-          <Tabs defaultValue="applications" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-              <TabsTrigger value="current">Current Students</TabsTrigger>
-              <TabsTrigger value="waitlist">Waitlist</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="applications" className="space-y-4">
-              <div className="space-y-4">
-                {mockApplications.map((application) => (
-                  <Card
-                    key={application.id}
-                    className="border-l-4 border-l-primary"
-                  >
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12 bg-primary/20">
-                            <AvatarFallback className="text-primary font-medium">
-                              {application.childName
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-medium text-lg">
-                              {application.childName}
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                              Age {application.age} • Parent:{' '}
-                              {application.parentName}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge
-                          className={getStatusColor(application.status)}
-                          variant="outline"
-                        >
-                          {application.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-4 mb-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Mail className="w-4 h-4 text-muted-foreground" />
-                            <span>{application.email}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-muted-foreground" />
-                            <span>{application.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <MapPin className="w-4 h-4 text-muted-foreground" />
-                            <span>{application.address}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              Applied:{' '}
-                              {new Date(
-                                application.appliedDate
-                              ).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              Preferred Start:{' '}
-                              {new Date(
-                                application.preferredStartDate
-                              ).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              Birth Date:{' '}
-                              {new Date(
-                                application.birthdate
-                              ).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {application.notes && (
-                        <div className="mb-4">
-                          <h5 className="font-medium text-sm mb-1">Notes:</h5>
-                          <p className="text-sm text-muted-foreground">
-                            {application.notes}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          View Full Application
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Schedule Interview
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="bg-accent hover:bg-accent/90"
-                        >
-                          Approve
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Reject
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="current" className="space-y-4">
-              <div className="grid lg:grid-cols-2 gap-4">
-                {currentStudents.map((student) => (
-                  <Card key={student.id} className="border-l-4 border-l-accent">
-                    <CardContent className="pt-4">
-                      <div className="flex items-center gap-4 mb-3">
-                        <Avatar className="h-12 w-12 bg-accent/20">
-                          <AvatarFallback className="text-accent font-medium">
-                            {student.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-medium">{student.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Age {student.age} • {student.classroom}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                        >
-                          View Profile
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                        >
-                          Contact Parent
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-transparent"
-                        >
-                          Edit Details
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="waitlist" className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-8">
-                    <UserPlus className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-foreground mb-2">
-                      No students on waitlist
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Students waiting for available spots will appear here when
-                      capacity is reached.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          <EnrollmentTabs
+            applications={filteredApplications}
+            currentStudents={students}
+            onViewApplication={handleViewApplication}
+            onScheduleInterview={handleScheduleInterview}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onViewProfile={handleViewProfile}
+            onContactParent={handleContactParent}
+            onEditDetails={handleEditDetails}
+          />
         </div>
       </main>
     </div>

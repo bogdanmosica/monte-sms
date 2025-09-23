@@ -31,7 +31,10 @@
       "Bash(pnpm test:*)",
       "Bash(cat:*)",
       "Bash(psql:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(pnpm db:logs:*)",
+      "Bash(npx tsx:*)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { eq, count, and, sql, sum, gte } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
 import { users, children, schools, payments, UserRole } from '@/lib/db/schema';
+import { applications, enrollments } from '@/lib/db/enrollment';
 import { getUser } from '@/lib/db/queries';
 
 export async function GET(request: NextRequest) {
@@ -27,6 +28,8 @@ export async function GET(request: NextRequest) {
       overduePayments,
       paidThisMonth,
       recentEnrollments,
+      pendingApplications,
+      approvedApplicationsThisMonth,
     ] = await Promise.all([
       // Total students (children)
       db.select({ count: count() }).from(children).where(eq(children.isActive, true)),
@@ -98,6 +101,31 @@ export async function GET(request: NextRequest) {
           gte(children.createdAt, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
         )
       ),
+
+      // Pending applications (with fallback if table doesn't exist)
+      (async () => {
+        try {
+          return await db.select({ count: count() }).from(applications).where(eq(applications.status, 'pending'));
+        } catch (error) {
+          console.warn('Applications table not found, using fallback value for pending applications');
+          return [{ count: 0 }];
+        }
+      })(),
+
+      // Applications approved this month (with fallback if table doesn't exist)
+      (async () => {
+        try {
+          return await db.select({ count: count() }).from(applications).where(
+            and(
+              eq(applications.status, 'approved'),
+              gte(applications.reviewedAt, new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+            )
+          );
+        } catch (error) {
+          console.warn('Applications table not found, using fallback value for approved applications');
+          return [{ count: 0 }];
+        }
+      })(),
     ]);
 
     // Calculate enrollment metrics
@@ -121,7 +149,8 @@ export async function GET(request: NextRequest) {
         enrollmentPercentage,
         availableSpots,
         newEnrollments: recentEnrollments[0]?.count || 0,
-        pendingApplications: 0, // Would come from applications table when implemented
+        pendingApplications: pendingApplications[0]?.count || 0,
+        approvedThisMonth: approvedApplicationsThisMonth[0]?.count || 0,
       },
       staff: {
         totalStaff: totalStaff[0]?.count || 0,

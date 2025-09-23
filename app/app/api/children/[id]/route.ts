@@ -169,6 +169,15 @@ export async function PUT(
             'canReceivePhotos',
             'canParticipateInActivities',
           ];
+
+          // Ensure validatedData is not null/undefined before calling Object.entries
+          if (!validatedData || typeof validatedData !== 'object') {
+            return Response.json(
+              { error: 'Invalid update data' },
+              { status: 400 }
+            );
+          }
+
           const updateData = Object.fromEntries(
             Object.entries(validatedData).filter(([key]) =>
               allowedFields.includes(key)
